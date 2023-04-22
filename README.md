@@ -53,8 +53,8 @@ For chunk system workers without pre-generation, it's difficult to provide a spe
 In our test server, we allocated 16 threads, but chunk generation was still slow with around 300 players.
 
 Next, adjust your garbage collection (GC) settings. Keep in mind that GC settings allocate concurrent threads,
-and you need to know the exact number. This is typically set using the -XX:ConcGCThreads=n flag.
-Don't confuse this with -XX:ParallelGCThreads=n, as parallel GC threads run only when the
+and you need to know the exact number. This is typically set using the `-XX:ConcGCThreads=X` flag.
+Don't confuse this with `-XX:ParallelGCThreads=X`, as parallel GC threads run only when the
 application is paused by GC and should not be considered.
 
 After allocating threads for the tasks above, you can assign the remaining cores to tickthreads 
