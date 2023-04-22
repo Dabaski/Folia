@@ -34,39 +34,40 @@ should have a sizeable player count, too.
 ### What hardware will Folia run best on?
 Ideally, at least 16 _cores_ (not threads).
 
-### How to best configure Folia?
-First, it is recommended that the world is pre-generated so that the number
-of chunk system worker threads required is reduced greatly.
+### How to optimally configure Folia?
 
-The following is a _very rough_ estimation based off of the testing
-done before Folia was released on the test server we ran that
-had ~330 players peak. So, it is not exact and will require further tuning - 
-just take it as a starting point.
+To get the best performance from Folia, it's recommended that you
+pre-generate the world, which significantly reduces the number of
+chunk system worker threads needed.
 
-The total number of cores on the machine available should be 
-taken into account. Then, allocate threads for: 
-- netty IO :~4 per 200-300 players
-- chunk system io threads: ~3 per 200-300 players
-- chunk system workers if pre-generated, ~2 per 200-300 players
-- There is no best guess for chunk system workers if not pre-generated, as
-  on the test server we ran we gave 16 threads but chunk generation was still
-  slow at ~300 players.
-- GC Settings: ???? But, GC settings _do_ allocate concurrent threads, and you need
-  to know exactly how many. This is typically through the `-XX:ConcGCThreads=n` flag. Do not
-  confuse this flag with `-XX:ParallelGCThreads=n`, as parallel GC threads only run when
-  the application is paused by GC and as such should not be taken into account.
+Here's a rough guide based on tests with a server that reached a peak of around 330 players.
+Please note that this is just a starting point and may require further tuning depending on your specific situation.
 
-After all of that allocation, the remaining cores on the system until 80%
-allocation (total threads allocated < 80% of cpus available) can be
-allocated to tickthreads (under global config, threaded-regions.threads). 
+First, consider the total number of cores available on your machine. Allocate threads for the following tasks:
 
-The reason you should not allocate more than 80% of the cores is due to the
-fact that plugins or even the server may make use of additional threads 
-that you cannot configure or even predict.
+    Netty IO: Approximately 4 threads per 200-300 players
+    Chunk system IO threads: Approximately 3 threads per 200-300 players
+    Chunk system workers (if pre-generated): Approximately 2 threads per 200-300 players
 
-Additionally, the above is all a rough guess based on player count, but
-it is very likely that the thread allocation will not be ideal, and you 
-will need to tune it based on usage of the threads that you end up seeing.
+For chunk system workers without pre-generation, it's difficult to provide a specific number.
+In our test server, we allocated 16 threads, but chunk generation was still slow with around 300 players.
+
+Next, adjust your garbage collection (GC) settings. Keep in mind that GC settings allocate concurrent threads,
+and you need to know the exact number. This is typically set using the -XX:ConcGCThreads=n flag.
+Don't confuse this with -XX:ParallelGCThreads=n, as parallel GC threads run only when the
+application is paused by GC and should not be considered.
+
+After allocating threads for the tasks above, you can assign the remaining cores to tickthreads 
+(found in the global config under threaded-regions.threads) until you reach 80% core utilization. 
+Avoid allocating more than 80% of the cores, as plugins or the server itself may use additional 
+threads that you can't configure or predict.
+
+Please note that these estimates are based on player count and may not be ideal for your specific situation. 
+You may need to fine-tune your thread allocation based on the actual usage of the threads.
+
+To configure Folia, refer to the paper-global.yml file that you provided earlier. 
+This file contains various settings that you can adjust to optimize Folia for your server. 
+For more information on each setting, visit the documentation and support links found in the paper-global.yml file.
 
 ## Plugin compatibility
 
@@ -77,6 +78,9 @@ possible race conditions in plugin held data - so, there are bound
 to be changes that need to be made.
 
 So, have your expectations for compatibility at 0.
+
+[Modrinth has a filter for plugins that work on Folia as of right now.](https://modrinth.com/plugins?g=categories%3A%27folia%27)
+
 
 ## API plans
 
@@ -100,7 +104,7 @@ or to Paperlib.
 
 ### The new rules
 
-First, Folia breaks many plugins. To aid users in figuring out which
+First, **Folia breaks many plugins**. To aid users in figuring out which
 plugins work, only plugins that have been explicitly marked by the
 author(s) to work with Folia will be loaded. By placing
 "folia-supported: true" into the plugin's plugin.yml, plugin authors
@@ -220,6 +224,24 @@ even though there is no main thread anymore.
     <scope>provided</scope>
 </dependency>
  ```
+
+### Compiling Yourself / Updating the Jar Version
+
+Since no one wants to provide information on how to compile this, I've written this guide for
+WINDOWS ONLY, because I don't use linux but I'll probably make one for Windows.
+If you do not have GIT installed for windows you can [install it from here](https://git-scm.com/downloads)
+YOU MUST HAVE GIT TO COMPILE THIS FROM THIS GUIDE
+
+1. Clone this repo, or the master repo with git via cmd
+   `git clone Enter REPO URL HERE`
+2. Navigate to the directory at ``C:\Users\YourUsername\Folia``
+3. Run the install.bat file to do the first part
+4. Run the patch.bat for the second part
+5. Run the jar.bat for the third part
+6. In the ``C:\Users\YourUsername\Folia`` directory open CMD and finally run
+   `gradlew createReobfBundlerJar` or gradlew createReobfBundlerJar
+
+Your compiled jars will be in ``C:\Users\YourUsername\Folia\build\libs``
 
 
 ## License
